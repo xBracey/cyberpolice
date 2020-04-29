@@ -8,6 +8,10 @@ public class Player : MonoBehaviour
     private Vector3 jump;
     private Rigidbody2D rb;
     private bool inAir = false;
+    private bool isAttacking = false;
+
+    [SerializeField]
+    private GameObject bullet;
 
     private Animator animator;
 
@@ -24,6 +28,7 @@ public class Player : MonoBehaviour
         SetInAir();
         Move();
         Jump();
+        Attack();
     }
 
     void SetInAir()
@@ -57,6 +62,39 @@ public class Player : MonoBehaviour
         }
     }
 
+    void Attack()
+    {
+        if (Input.GetMouseButtonDown(0) && !animator.GetBool("Jump") && !isAttacking)
+        {
+            CreateBullet();
+            isAttacking = true;
+            animator.SetBool("Attack", true);
+            StartCoroutine(ExitAttack());
+        }
+    }
+
+    void CreateBullet()
+    {
+        GameObject newBullet = Instantiate(bullet);
+        if (transform.eulerAngles.y == 0)
+        {
+            newBullet.transform.position = new Vector3(transform.position.x + 0.5f, transform.position.y, transform.position.z);
+            newBullet.GetComponent<Rigidbody2D>().AddForce(new Vector3(10, 1, 0));
+        }
+        else
+        {
+            newBullet.transform.position = new Vector3(transform.position.x - 0.5f, transform.position.y, transform.position.z);
+            newBullet.GetComponent<Rigidbody2D>().AddForce(new Vector3(-10, 1, 0));
+        }
+        StartCoroutine(DeleteBullet(newBullet));
+    }
+
+    IEnumerator DeleteBullet(GameObject newBullet)
+    {
+        yield return new WaitForSeconds(0.3f);
+        Destroy(newBullet);
+    }
+
 
     void Jump()
     {
@@ -68,7 +106,8 @@ public class Player : MonoBehaviour
         }
     }
 
-    void SuspendJump() {
+    void SuspendJump()
+    {
         animator.SetBool("Suspend", true);
     }
 
@@ -80,5 +119,12 @@ public class Player : MonoBehaviour
             animator.SetBool("Jump", false);
             animator.SetBool("Suspend", false);
         }
+    }
+
+    IEnumerator ExitAttack()
+    {
+        yield return new WaitForSeconds(0.5f);
+        isAttacking = false;
+        animator.SetBool("Attack", false);
     }
 }
