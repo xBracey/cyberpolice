@@ -66,25 +66,27 @@ public class Player : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0) && !animator.GetBool("Jump") && !isAttacking)
         {
-            CreateBullet();
             isAttacking = true;
             animator.SetBool("Attack", true);
             StartCoroutine(ExitAttack());
+            StartCoroutine(CreateBullet());
         }
     }
 
-    void CreateBullet()
+    IEnumerator CreateBullet()
     {
+        yield return new WaitForSeconds(0.15f);
         GameObject newBullet = Instantiate(bullet);
+        newBullet.tag = "Bullet";
         if (transform.eulerAngles.y == 0)
         {
             newBullet.transform.position = new Vector3(transform.position.x + 0.5f, transform.position.y, transform.position.z);
-            newBullet.GetComponent<Rigidbody2D>().AddForce(new Vector3(10, 1, 0));
+            newBullet.GetComponent<Rigidbody2D>().AddForce(new Vector3(15, 0.5f, 0));
         }
         else
         {
             newBullet.transform.position = new Vector3(transform.position.x - 0.5f, transform.position.y, transform.position.z);
-            newBullet.GetComponent<Rigidbody2D>().AddForce(new Vector3(-10, 1, 0));
+            newBullet.GetComponent<Rigidbody2D>().AddForce(new Vector3(-15, 0.5f, 0));
         }
         StartCoroutine(DeleteBullet(newBullet));
     }
